@@ -3,7 +3,7 @@ import { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 
 //TIPADO
-interface AuthState {
+export interface AuthState {
   user: User | null;
   loading: boolean;
   setUser: (user: User | null) => void;

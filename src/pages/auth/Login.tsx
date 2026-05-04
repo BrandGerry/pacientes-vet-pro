@@ -121,7 +121,7 @@ export default function Login() {
       />
 
       {/* Card */}
-      <div className="relative w-full max-w-sm bg-[#0f1611]/85 border border-indigo-500/20 rounded-2xl px-9 py-10 backdrop-blur-xl shadow-[0_32px_64px_rgba(0,0,0,0.5),0_0_80px_rgba(16,185,129,0.05)] animate-fadeUp">
+      <div className="my-3 relative w-full max-w-sm bg-[#0f1611]/85 border border-indigo-500/20 rounded-2xl px-9 py-10 backdrop-blur-xl shadow-[0_32px_64px_rgba(0,0,0,0.5),0_0_80px_rgba(16,185,129,0.05)] animate-fadeUp">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/25 rounded-full px-3 py-1 mb-5">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />

@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { useAuthStore } from "../store/useAuthStore";
+import { AuthState, useAuthStore } from "../store/useAuthStore";
 
 function RootRedirect() {
-  const user = useAuthStore((state: any) => state.user);
+  const user = useAuthStore((state: AuthState) => state.user);
   //SI HAY USUARIO LO MANDA A DASHBOARD
   if (user) {
     return <Navigate to="/dashboard" replace />;
