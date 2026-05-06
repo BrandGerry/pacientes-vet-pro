@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useUserStore } from "../store/useUserStore";
 import { LogOut } from "lucide-react";
 
 function MainLayout() {
@@ -8,6 +9,13 @@ function MainLayout() {
   const [open, setOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const { fetchProfile, loading, reset } = useUserStore();
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile(); // solo si hay sesión activa
+    }
+  }, [user]);
 
   const linkStyles = (path: string) =>
     `block px-4 py-2 rounded-lg transition ${
@@ -97,7 +105,10 @@ function MainLayout() {
               </p>
               <button
                 className="text-sm text-gray-600  cursor-pointer hover:text-gray-900"
-                onClick={() => logout()}
+                onClick={() => {
+                  reset();
+                  logout();
+                }}
               >
                 {<LogOut size={18} />}
               </button>
