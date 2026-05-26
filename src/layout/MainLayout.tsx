@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useUserStore } from "../store/useUserStore";
 import { LogOut } from "lucide-react";
+import { useInitApp } from "../hooks/useInitApp";
+import { useAppointmentStore } from "../store/useAppointmentStore";
+import { usePetsStore } from "../store/usePetsStore";
 
 function MainLayout() {
   const location = useLocation();
@@ -10,12 +13,10 @@ function MainLayout() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const { fetchProfile, loading, reset } = useUserStore();
+  const { reset: resetAppointment } = useAppointmentStore();
+  const { reset: resetPets } = usePetsStore();
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile(); // solo si hay sesión activa
-    }
-  }, [user]);
+  useInitApp();
 
   const linkStyles = (path: string) =>
     `block px-4 py-2 rounded-lg transition ${
@@ -107,6 +108,8 @@ function MainLayout() {
                 className="text-sm text-gray-600  cursor-pointer hover:text-gray-900"
                 onClick={() => {
                   reset();
+                  resetAppointment();
+                  resetPets();
                   logout();
                 }}
               >

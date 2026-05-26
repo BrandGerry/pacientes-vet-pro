@@ -10,7 +10,8 @@ export interface Profile {
   phone: string | null;
   avatar_url: string | null;
   role: string | null;
-  createted_at: Date | null;
+  created_at: Date | null;
+  status: string;
 }
 
 //TIPADO
@@ -18,6 +19,8 @@ export interface UserState {
   userProfile: Profile | null;
   loading: boolean;
   error: string | null;
+  activeUsersCount: number;
+  allUsers: () => Promise<void>;
   fetchProfile: () => Promise<void>;
   updateProfile: (data: Partial<Profile>) => Promise<void>;
   reset: () => void;
@@ -31,7 +34,39 @@ export const useUserStore = create<UserState>()(
       userProfile: null,
       loading: false,
       error: null,
+      activeUsersCount: 0,
+      allUsers: async () => {
+        set({ loading: true, error: null });
 
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+          set({
+            error: authError?.message || "No authenticated user",
+            loading: false,
+          });
+          return;
+        }
+
+        // 👇 Query para contar usuarios con status "active"
+        const { count, error: countError } = await supabase
+          .from("users")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "active");
+
+        if (countError) {
+          set({ error: countError.message, loading: false });
+          return;
+        }
+
+        set({
+          activeUsersCount: count ?? 0,
+          loading: false,
+        });
+      },
       // FUNCIONES
       fetchProfile: async () => {
         set({ loading: true, error: null });
@@ -95,6 +130,7 @@ export const useUserStore = create<UserState>()(
           userProfile: null,
           loading: false,
           error: null,
+          activeUsersCount: 0,
         }),
     }),
     {
