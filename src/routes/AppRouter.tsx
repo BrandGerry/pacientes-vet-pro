@@ -10,7 +10,6 @@ import PublicRoute from "../routes/PublicRoute";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Login from "../pages/auth/Login";
 import { OwnersList } from "../pages/owners/OwnersList";
-import { OwnersForm } from "../pages/owners/OwnersForm";
 import { OwnerDetail } from "../pages/owners/OwnerDetail";
 import { PetsDetail } from "../pages/pets/PetsDetail";
 import { PetsForm } from "../pages/pets/PetsForm";
@@ -18,6 +17,8 @@ import { PetsList } from "../pages/pets/PetsList";
 import { MedicalRecordForm } from "../pages/medical/MedicalRecordForm";
 import { AppointmentForm } from "../pages/appoinments/AppointmentForm";
 import { AppointmentList } from "../pages/appoinments/AppointmentList";
+import { MedicalList } from "../pages/medical/MedicalList";
+import { Reportes } from "../pages/graphics/Reportes";
 
 function AppRouter() {
   return (
@@ -52,7 +53,6 @@ function AppRouter() {
 
           {/* Owners */}
           <Route path="/owners" element={<OwnersList />} />
-          <Route path="/owners/new" element={<OwnersForm />} />
           <Route path="/owners/:id" element={<OwnerDetail />} />
 
           {/* Pets */}
@@ -62,10 +62,14 @@ function AppRouter() {
 
           {/* Medical */}
           <Route path="/pets/:id/records/new" element={<MedicalRecordForm />} />
+          <Route path="/records/list" element={<MedicalList />} />
 
           {/* Appointments */}
           <Route path="/appointments" element={<AppointmentList />} />
           <Route path="/appointments/new" element={<AppointmentForm />} />
+
+          {/* Ghapics */}
+          <Route path="/reports" element={<Reportes />} />
         </Route>
 
         {/* fallback */}
