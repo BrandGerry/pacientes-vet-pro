@@ -73,6 +73,7 @@ export const getPetEmoji = (specie: string) => {
     case "pajaro":
     case "pájaro":
     case "bird":
+    case "loro":
       return "🦆";
 
     case "reptil":

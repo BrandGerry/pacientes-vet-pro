@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "./useAuthStore";
+import { Medicals } from "./useAppointmentStore";
 
 export interface Pets {
   id: string;
@@ -11,24 +12,41 @@ export interface Pets {
   specie: string;
   breed: string;
   owner_name: string;
+  sex: string;
+  birth_date: string;
+  weight: string;
+  sterilized: boolean;
+  blood_type: string;
+  is_deceased: boolean;
+  color: string | null;
+  last_visit: string | null;
+  vaccines?: Vaccines[];
+  medical?: Medicals[];
+}
+
+export interface Vaccines {
+  aplication_date: string;
+  created_at: string;
+  id: string;
+  next_dose_date: string | null;
+  notes: string;
+  pet_id: string;
+  vaccine_name: string;
 }
 
 export interface Owners {
   id: string;
-  created_at: Date;
+  created_at: string;
   user_id: string;
   name: string;
   email: string | null;
   phone: string | null;
+  address: string | null;
+  notes: string | null;
+  avatar_url: string | null;
 }
 
-export interface OwnerWithPets {
-  id: string;
-  created_at: Date;
-  user_id: string;
-  email: string | null;
-  name: string;
-  phone: string | null;
+export interface OwnerWithPets extends Owners {
   pets: Pets[];
 }
 
