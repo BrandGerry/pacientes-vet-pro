@@ -53,9 +53,11 @@ export interface OwnerWithPets extends Owners {
 //TIPADO
 export interface UserState {
   pets: OwnerWithPets[] | null;
+  onlyPets: Pets[] | null;
   loading: boolean;
   error: string | null;
   fetchPets: () => Promise<void>;
+  fetchOnlyPets: () => Promise<void>;
   insertPet: (data: Partial<Pets>) => Promise<void>;
   insertOwner: (data: Partial<Owners>) => Promise<void>;
   updatePets: (petId: string, data: Partial<Pets>) => Promise<void>;
@@ -70,6 +72,7 @@ export const usePetsStore = create<UserState>()(
       // ESTADOS
       pets: null,
       loading: false,
+      onlyPets: null,
       error: null,
       // FUNCIONES
       fetchPets: async () => {
@@ -101,6 +104,31 @@ export const usePetsStore = create<UserState>()(
         }
 
         set({ pets: data, loading: false });
+      },
+      fetchOnlyPets: async () => {
+        set({ loading: true, error: null });
+
+        const user = useAuthStore.getState().user;
+
+        if (!user) {
+          set({
+            error: "No authenticated user",
+            loading: false,
+          });
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("pets")
+          .select("*")
+          .eq("user_id", user.id);
+
+        if (error) {
+          set({ error: error.message, loading: false });
+          return;
+        }
+
+        set({ onlyPets: data, loading: false });
       },
       insertPet: async (petData) => {
         set({ loading: true, error: null });

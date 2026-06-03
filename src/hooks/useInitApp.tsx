@@ -8,6 +8,7 @@ export const useInitApp = () => {
   const fetchProfile = useUserStore((s) => s.fetchProfile);
   const allUsers = useUserStore((s) => s.allUsers);
   const fetchPets = usePetsStore((s) => s.fetchPets);
+  const fetchOnlyPets = usePetsStore((s) => s.fetchOnlyPets);
   const fetchAppts = useAppointmentStore((s) => s.fetchAppointments);
   const fetchAppointmentsToday = useAppointmentStore(
     (s) => s.fetchAppointmentsToday
@@ -28,6 +29,7 @@ export const useInitApp = () => {
         allUsers(),
         fetchAppointmentsToday(),
         fetchLastAppointments(),
+        fetchOnlyPets(),
       ]);
     };
     init();
