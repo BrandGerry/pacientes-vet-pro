@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { StepBar } from "../../components/pets/StepBar";
+import { STEPS } from "../../helpers/dataOfPets";
+import { StepInfo } from "../../components/pets/StepInfo";
+import { Label } from "../../components/pets/Label";
+import { ErrorMsg } from "../../components/pets/ErrorMsj";
+import { StepMedical } from "../../components/pets/StepMedical";
+import { StepVaccines } from "../../components/pets/StepVaccines";
+import { Owners } from "../../store/usePetsStore";
 
 // ── Types ──────────────────────────────────────────────────────────────────
-interface PetFormData {
+export interface PetFormData {
   // Básicos
   name: string;
   specie: string;
@@ -21,7 +29,7 @@ interface PetFormData {
   medical: MedicalFormData;
 }
 
-interface VaccineFormData {
+export interface VaccineFormData {
   _key: number;
   vaccine_name: string;
   aplication_date: string;
@@ -29,7 +37,7 @@ interface VaccineFormData {
   notes: string;
 }
 
-interface MedicalFormData {
+export interface MedicalFormData {
   symptoms: string;
   diagnosis: string;
   treatment: string;
@@ -37,45 +45,6 @@ interface MedicalFormData {
 }
 
 // ── Mock owners (reemplaza con tu store) ───────────────────────────────────
-const MOCK_OWNERS = [
-  { id: "1", name: "Ana García" },
-  { id: "2", name: "Carlos Mendoza" },
-  { id: "3", name: "Sofía Torres" },
-  { id: "4", name: "Miguel Ángel Reyes" },
-  { id: "5", name: "Valentina Cruz" },
-  { id: "6", name: "Luis Hernández" },
-];
-
-const SPECIES = [
-  "dog",
-  "cat",
-  "bird",
-  "rabbit",
-  "hamster",
-  "fish",
-  "reptile",
-  "otro",
-];
-const SPECIES_LABELS: Record<string, string> = {
-  dog: "🐶 Perro",
-  cat: "🐱 Gato",
-  bird: "🐦 Ave",
-  rabbit: "🐰 Conejo",
-  hamster: "🐹 Hámster",
-  fish: "🐠 Pez",
-  reptile: "🦎 Reptil",
-  otro: "🐾 Otro",
-};
-const BLOOD_TYPES = [
-  "DEA 1.1+",
-  "DEA 1.1-",
-  "DEA 1.2+",
-  "DEA 1.2-",
-  "A",
-  "B",
-  "AB",
-  "Desconocido",
-];
 
 const EMPTY_VACCINE = (): VaccineFormData => ({
   _key: Date.now() + Math.random(),
@@ -107,469 +76,27 @@ const INITIAL: PetFormData = {
   medical: { ...EMPTY_MEDICAL },
 };
 
+const INITIAL_OWNERS: Owners = {
+  user_id: "cb32acd1-8e1b-457d-af49-d9775e0e8755",
+  name: "",
+  email: "",
+  phone: "",
+  address: "",
+  notes: "",
+  avatar_url: "",
+};
+
 // ── Helpers ────────────────────────────────────────────────────────────────
-type Step = "info" | "medical" | "vaccines";
-const STEPS: { id: Step; label: string; emoji: string }[] = [
-  { id: "info", label: "Datos de la mascota", emoji: "🐾" },
-  { id: "medical", label: "Consulta inicial", emoji: "🩺" },
-  { id: "vaccines", label: "Vacunas", emoji: "💉" },
-];
-
-// ── Small UI ───────────────────────────────────────────────────────────────
-const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({
-  children,
-  required,
-}) => (
-  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-    {children}
-    {required && <span className="text-red-400 ml-0.5">*</span>}
-  </label>
-);
-
-const inputCls =
-  "w-full px-3.5 py-2.5 rounded-xl border border-green-200 bg-white text-sm text-gray-700 placeholder-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition";
-const selectCls = `${inputCls} cursor-pointer`;
-
-const ErrorMsg: React.FC<{ msg?: string }> = ({ msg }) =>
-  msg ? <p className="mt-1 text-xs text-red-500">{msg}</p> : null;
-
-// ── Step indicator ─────────────────────────────────────────────────────────
-const StepBar: React.FC<{ current: Step; completed: Set<Step> }> = ({
-  current,
-  completed,
-}) => (
-  <div className="flex items-center gap-0 mb-8">
-    {STEPS.map((step, i) => {
-      const isActive = current === step.id;
-      const isDone = completed.has(step.id);
-      return (
-        <React.Fragment key={step.id}>
-          <div className="flex flex-col items-center gap-1.5 flex-1">
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-base font-bold border-2 transition-all duration-200 ${
-                isDone
-                  ? "bg-green-500 border-green-500 text-white shadow-md shadow-green-200"
-                  : isActive
-                  ? "bg-white border-green-400 text-green-600 shadow-sm"
-                  : "bg-gray-50 border-gray-200 text-gray-400"
-              }`}
-            >
-              {isDone ? "✓" : step.emoji}
-            </div>
-            <span
-              className={`text-[10px] font-semibold uppercase tracking-wide text-center leading-tight ${
-                isActive
-                  ? "text-green-600"
-                  : isDone
-                  ? "text-green-500"
-                  : "text-gray-400"
-              }`}
-            >
-              {step.label}
-            </span>
-          </div>
-          {i < STEPS.length - 1 && (
-            <div
-              className={`h-0.5 flex-1 mb-5 mx-1 rounded transition-colors duration-300 ${
-                isDone ? "bg-green-400" : "bg-gray-200"
-              }`}
-            />
-          )}
-        </React.Fragment>
-      );
-    })}
-  </div>
-);
-
-// ── Step 1: Pet info ───────────────────────────────────────────────────────
-const StepInfo: React.FC<{
-  data: PetFormData;
-  errors: Partial<Record<keyof PetFormData, string>>;
-  onChange: (field: keyof PetFormData, value: unknown) => void;
-}> = ({ data, errors, onChange }) => (
-  <div className="space-y-5">
-    {/* Owner */}
-    <div>
-      <Label required>Propietario</Label>
-      <select
-        value={data.owner_id}
-        onChange={(e) => onChange("owner_id", e.target.value)}
-        className={selectCls}
-      >
-        <option value="">Seleccionar propietario...</option>
-        {MOCK_OWNERS.map((o) => (
-          <option key={o.id} value={o.id}>
-            {o.name}
-          </option>
-        ))}
-      </select>
-      <ErrorMsg msg={errors.owner_id} />
-    </div>
-
-    {/* Name + Species */}
-    <div className="grid sm:grid-cols-2 gap-4">
-      <div>
-        <Label required>Nombre</Label>
-        <input
-          type="text"
-          placeholder="Ej. Luna"
-          value={data.name}
-          onChange={(e) => onChange("name", e.target.value)}
-          className={inputCls}
-        />
-        <ErrorMsg msg={errors.name} />
-      </div>
-      <div>
-        <Label required>Especie</Label>
-        <select
-          value={data.specie}
-          onChange={(e) => onChange("specie", e.target.value)}
-          className={selectCls}
-        >
-          <option value="">Seleccionar...</option>
-          {SPECIES.map((s) => (
-            <option key={s} value={s}>
-              {SPECIES_LABELS[s]}
-            </option>
-          ))}
-        </select>
-        <ErrorMsg msg={errors.specie} />
-      </div>
-    </div>
-
-    {/* Breed + Color */}
-    <div className="grid sm:grid-cols-2 gap-4">
-      <div>
-        <Label>Raza</Label>
-        <input
-          type="text"
-          placeholder="Ej. Golden Retriever"
-          value={data.breed}
-          onChange={(e) => onChange("breed", e.target.value)}
-          className={inputCls}
-        />
-      </div>
-      <div>
-        <Label>Color</Label>
-        <input
-          type="text"
-          placeholder="Ej. Dorado"
-          value={data.color}
-          onChange={(e) => onChange("color", e.target.value)}
-          className={inputCls}
-        />
-      </div>
-    </div>
-
-    {/* Sex + Birth date */}
-    <div className="grid sm:grid-cols-2 gap-4">
-      <div>
-        <Label required>Sexo</Label>
-        <select
-          value={data.sex}
-          onChange={(e) => onChange("sex", e.target.value)}
-          className={selectCls}
-        >
-          <option value="">Seleccionar...</option>
-          <option value="macho">♂ Macho</option>
-          <option value="hembra">♀ Hembra</option>
-        </select>
-        <ErrorMsg msg={errors.sex} />
-      </div>
-      <div>
-        <Label required>Fecha de nacimiento</Label>
-        <input
-          type="date"
-          value={data.birth_date}
-          onChange={(e) => onChange("birth_date", e.target.value)}
-          className={inputCls}
-          max={new Date().toISOString().split("T")[0]}
-        />
-        <ErrorMsg msg={errors.birth_date} />
-      </div>
-    </div>
-
-    {/* Weight + Blood type */}
-    <div className="grid sm:grid-cols-2 gap-4">
-      <div>
-        <Label>Peso (kg)</Label>
-        <input
-          type="number"
-          step="0.1"
-          min="0"
-          placeholder="Ej. 28.5"
-          value={data.weight}
-          onChange={(e) => onChange("weight", e.target.value)}
-          className={inputCls}
-        />
-      </div>
-      <div>
-        <Label>Tipo de sangre</Label>
-        <select
-          value={data.blood_type}
-          onChange={(e) => onChange("blood_type", e.target.value)}
-          className={selectCls}
-        >
-          <option value="">Seleccionar...</option>
-          {BLOOD_TYPES.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-
-    {/* Sterilized */}
-    <div>
-      <button
-        type="button"
-        onClick={() => onChange("sterilized", !data.sterilized)}
-        className={`inline-flex items-center gap-3 px-4 py-3 rounded-xl border-2 w-full transition-all duration-150 ${
-          data.sterilized
-            ? "border-green-400 bg-green-50"
-            : "border-gray-200 bg-white"
-        }`}
-      >
-        <div
-          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-            data.sterilized
-              ? "bg-green-500 border-green-500"
-              : "border-gray-300"
-          }`}
-        >
-          {data.sterilized && (
-            <svg
-              className="w-3 h-3 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          )}
-        </div>
-        <div className="text-left">
-          <p
-            className={`text-sm font-semibold ${
-              data.sterilized ? "text-green-700" : "text-gray-600"
-            }`}
-          >
-            Esterilizado/a
-          </p>
-          <p className="text-xs text-gray-400">
-            La mascota ha sido esterilizada o castrada
-          </p>
-        </div>
-      </button>
-    </div>
-  </div>
-);
-
-// ── Step 2: Medical ────────────────────────────────────────────────────────
-const StepMedical: React.FC<{
-  data: MedicalFormData;
-  errors: Partial<Record<keyof MedicalFormData, string>>;
-  onChange: (field: keyof MedicalFormData, value: string) => void;
-}> = ({ data, errors, onChange }) => (
-  <div className="space-y-5">
-    <div className="flex items-start gap-3 p-3.5 rounded-xl bg-green-50 border border-green-100">
-      <span className="text-lg">🩺</span>
-      <p className="text-xs text-green-700 leading-relaxed">
-        Registra el motivo de esta primera consulta. Esta información quedará en
-        el historial médico de la mascota.
-      </p>
-    </div>
-
-    <div>
-      <Label required>Síntomas</Label>
-      <textarea
-        rows={3}
-        placeholder="Describe los síntomas que presenta la mascota..."
-        value={data.symptoms}
-        onChange={(e) => onChange("symptoms", e.target.value)}
-        className={`${inputCls} resize-none`}
-      />
-      <ErrorMsg msg={errors.symptoms} />
-    </div>
-
-    <div>
-      <Label required>Diagnóstico</Label>
-      <textarea
-        rows={3}
-        placeholder="Diagnóstico del veterinario..."
-        value={data.diagnosis}
-        onChange={(e) => onChange("diagnosis", e.target.value)}
-        className={`${inputCls} resize-none`}
-      />
-      <ErrorMsg msg={errors.diagnosis} />
-    </div>
-
-    <div>
-      <Label required>Tratamiento</Label>
-      <textarea
-        rows={3}
-        placeholder="Tratamiento indicado, medicamentos, dosis..."
-        value={data.treatment}
-        onChange={(e) => onChange("treatment", e.target.value)}
-        className={`${inputCls} resize-none`}
-      />
-      <ErrorMsg msg={errors.treatment} />
-    </div>
-
-    <div>
-      <Label>Notas adicionales</Label>
-      <textarea
-        rows={2}
-        placeholder="Observaciones, indicaciones de seguimiento..."
-        value={data.notes}
-        onChange={(e) => onChange("notes", e.target.value)}
-        className={`${inputCls} resize-none`}
-      />
-    </div>
-  </div>
-);
-
-// ── Step 3: Vaccines ───────────────────────────────────────────────────────
-const StepVaccines: React.FC<{
-  vaccines: VaccineFormData[];
-  onAdd: () => void;
-  onRemove: (key: number) => void;
-  onChange: (key: number, field: keyof VaccineFormData, value: string) => void;
-  errors: Record<number, Partial<Record<keyof VaccineFormData, string>>>;
-}> = ({ vaccines, onAdd, onRemove, onChange, errors }) => (
-  <div className="space-y-4">
-    <div className="flex items-start gap-3 p-3.5 rounded-xl bg-green-50 border border-green-100">
-      <span className="text-lg">💉</span>
-      <p className="text-xs text-green-700 leading-relaxed">
-        Agrega las vacunas que ya tiene aplicadas. Este paso es opcional —
-        puedes añadir más vacunas después.
-      </p>
-    </div>
-
-    {vaccines.length === 0 && (
-      <div className="flex flex-col items-center justify-center py-10 rounded-2xl border border-dashed border-green-200 bg-green-50/40 text-center">
-        <span className="text-3xl mb-2">💉</span>
-        <p className="text-sm text-gray-400">Sin vacunas agregadas aún</p>
-      </div>
-    )}
-
-    {vaccines.map((v, i) => (
-      <div
-        key={v._key}
-        className="bg-white rounded-2xl border border-green-100 shadow-sm p-5 space-y-4"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-green-600">
-            Vacuna {i + 1}
-          </span>
-          <button
-            type="button"
-            onClick={() => onRemove(v._key)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Name */}
-        <div>
-          <Label required>Nombre de la vacuna</Label>
-          <input
-            type="text"
-            placeholder="Ej. Rabia, Moquillo, Parvovirus..."
-            value={v.vaccine_name}
-            onChange={(e) => onChange(v._key, "vaccine_name", e.target.value)}
-            className={inputCls}
-          />
-          <ErrorMsg msg={errors[v._key]?.vaccine_name} />
-        </div>
-
-        {/* Dates */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label required>Fecha de aplicación</Label>
-            <input
-              type="date"
-              value={v.aplication_date}
-              max={new Date().toISOString().split("T")[0]}
-              onChange={(e) =>
-                onChange(v._key, "aplication_date", e.target.value)
-              }
-              className={inputCls}
-            />
-            <ErrorMsg msg={errors[v._key]?.aplication_date} />
-          </div>
-          <div>
-            <Label>Próxima dosis</Label>
-            <input
-              type="date"
-              value={v.next_dose_date}
-              onChange={(e) =>
-                onChange(v._key, "next_dose_date", e.target.value)
-              }
-              className={inputCls}
-            />
-          </div>
-        </div>
-
-        {/* Notes */}
-        <div>
-          <Label>Notas</Label>
-          <input
-            type="text"
-            placeholder="Ej. Sin reacciones adversas"
-            value={v.notes}
-            onChange={(e) => onChange(v._key, "notes", e.target.value)}
-            className={inputCls}
-          />
-        </div>
-      </div>
-    ))}
-
-    <button
-      type="button"
-      onClick={onAdd}
-      className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-green-300 text-green-600 text-sm font-semibold hover:bg-green-50 hover:border-green-400 transition-all"
-    >
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2.5}
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-      Agregar vacuna
-    </button>
-  </div>
-);
+export type Step = "info" | "medical" | "vaccines";
 
 // ── Main Component ─────────────────────────────────────────────────────────
 export const PetsForm: React.FC = () => {
   const navigate = useNavigate();
+  //ESTADOS
   const [step, setStep] = useState<Step>("info");
   const [completed, setCompleted] = useState<Set<Step>>(new Set());
   const [form, setForm] = useState<PetFormData>(INITIAL);
+  const [formOwner, setFormOwner] = useState<Owners>(INITIAL_OWNERS);
   const [errors, setErrors] = useState<
     Partial<Record<keyof PetFormData, string>>
   >({});
@@ -732,8 +259,8 @@ export const PetsForm: React.FC = () => {
   // ── Render ─────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-8">
-      <div className="max-w-2xl mx-auto">
-        {/* Back */}
+      <div className="max-w-5xl mx-auto">
+        {/* Back ✅ */}
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-green-700 transition-colors group mb-6"
@@ -754,7 +281,7 @@ export const PetsForm: React.FC = () => {
           Cancelar
         </button>
 
-        {/* Header */}
+        {/* Header ✅*/}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
             Registrar mascota
@@ -764,12 +291,12 @@ export const PetsForm: React.FC = () => {
           </p>
         </div>
 
-        {/* Step bar */}
+        {/* Step bar ✅*/}
         <StepBar current={step} completed={completed} />
 
         {/* Card */}
         <div className="bg-white rounded-2xl border border-green-100 shadow-sm p-6 sm:p-8">
-          {/* Step title */}
+          {/* Step title ✅*/}
           <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-green-50">
             <span className="text-xl">
               {STEPS.find((s) => s.id === step)?.emoji}
@@ -779,7 +306,7 @@ export const PetsForm: React.FC = () => {
             </h2>
           </div>
 
-          {/* Step content */}
+          {/* CONTENIDO */}
           {step === "info" && (
             <StepInfo data={form} errors={errors} onChange={handleField} />
           )}

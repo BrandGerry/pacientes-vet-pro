@@ -35,8 +35,8 @@ export interface Vaccines {
 }
 
 export interface Owners {
-  id: string;
-  created_at: string;
+  id?: string;
+  created_at?: string;
   user_id: string;
   name: string;
   email: string | null;

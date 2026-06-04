@@ -1,3 +1,5 @@
+import { Step } from "../pages/pets/PetsForm";
+
 export const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("es-MX", {
     day: "2-digit",
@@ -130,3 +132,9 @@ export const SPECIES_CONFIG_IND: Record<
     text: "text-lime-700",
   },
 };
+
+export const STEPS: { id: Step; label: string; emoji: string }[] = [
+  { id: "info", label: "Datos de la mascota", emoji: "🐾" },
+  { id: "medical", label: "Consulta inicial", emoji: "🩺" },
+  { id: "vaccines", label: "Vacunas", emoji: "💉" },
+];
