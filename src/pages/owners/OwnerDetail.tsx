@@ -5,7 +5,6 @@ import { formatDate, getInitials } from "../../helpers/dataOfOwner";
 import { PetCard } from "../../components/owners/PetCard";
 import { InfoRow } from "../../components/owners/InfoRow";
 import { OwnerWithPets } from "../../store/usePetsStore";
-import { ListGroup } from "react-bootstrap";
 
 // ── Mock data (reemplaza con tu store) ─────────────────────────────────────
 const MOCK_OWNERS = [

@@ -1,5 +1,5 @@
 import { getInitials } from "../../helpers/dataOfOwner";
-import { OwnerWithPets, Pets } from "../../store/usePetsStore";
+import { OwnerWithPets } from "../../store/usePetsStore";
 import { PetChip } from "./PetChip";
 
 export const OwnerCard: React.FC<{

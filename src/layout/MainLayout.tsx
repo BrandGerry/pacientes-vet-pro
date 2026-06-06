@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useUserStore } from "../store/useUserStore";
 import { LogOut } from "lucide-react";
@@ -12,7 +12,7 @@ function MainLayout() {
   const [open, setOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
-  const { fetchProfile, loading, reset } = useUserStore();
+  const { reset } = useUserStore();
   const { reset: resetAppointment } = useAppointmentStore();
   const { reset: resetPets } = usePetsStore();
 
