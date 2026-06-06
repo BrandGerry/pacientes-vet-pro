@@ -30,7 +30,9 @@ export const MedicalCard: React.FC<{ record: Medicals; index: number }> = ({
         </span>
       </div>
       <span className="text-xs text-gray-400">
-        {formatDateLong(record.created_at.toString())}
+        {record &&
+          record.created_at &&
+          formatDateLong(record.created_at.toString())}
       </span>
     </div>
 

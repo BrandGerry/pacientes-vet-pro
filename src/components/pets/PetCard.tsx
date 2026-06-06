@@ -81,7 +81,7 @@ export const PetCard: React.FC<{ pet: Pets; onClick: () => void }> = ({
         {/* Owner */}
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <div className="w-5 h-5 rounded-full bg-green-200 flex items-center justify-center text-[10px] font-bold text-green-800 shrink-0">
-            {pet.owner_name[0]}
+            {pet && pet.owner_name && pet.owner_name[0]}
           </div>
           <span className="truncate">{pet.owner_name}</span>
           {pet.sterilized && (

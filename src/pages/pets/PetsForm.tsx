@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { StepBar } from "../../components/pets/StepBar";
 import { STEPS } from "../../helpers/dataOfPets";
 import { StepInfo } from "../../components/pets/StepInfo";
-import { Label } from "../../components/pets/Label";
-import { ErrorMsg } from "../../components/pets/ErrorMsj";
 import { StepMedical } from "../../components/pets/StepMedical";
 import { StepVaccines } from "../../components/pets/StepVaccines";
-import { Owners } from "../../store/usePetsStore";
+import { Owners, usePetsStore } from "../../store/usePetsStore";
+import { StepUser } from "../../components/pets/StepUser";
+import { registerPet } from "../../services/registerPet";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 export interface PetFormData {
@@ -87,16 +87,20 @@ const INITIAL_OWNERS: Owners = {
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-export type Step = "info" | "medical" | "vaccines";
+export type Step = "user" | "info" | "medical" | "vaccines";
 
 // ── Main Component ─────────────────────────────────────────────────────────
 export const PetsForm: React.FC = () => {
   const navigate = useNavigate();
   //ESTADOS
-  const [step, setStep] = useState<Step>("info");
+  const fetchPets = usePetsStore((s) => s.fetchPets);
+  const [step, setStep] = useState<Step>("user");
   const [completed, setCompleted] = useState<Set<Step>>(new Set());
   const [form, setForm] = useState<PetFormData>(INITIAL);
   const [formOwner, setFormOwner] = useState<Owners>(INITIAL_OWNERS);
+  const [errorsOwner, setErrorsOwner] = useState<
+    Partial<Record<keyof Owners, string>>
+  >({});
   const [errors, setErrors] = useState<
     Partial<Record<keyof PetFormData, string>>
   >({});
@@ -110,6 +114,11 @@ export const PetsForm: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   // ── Field handlers ─────────────────────────────────────────────────────
+  const handleOwner = (field: keyof Owners, value: unknown) => {
+    setFormOwner((f) => ({ ...f, [field]: value }));
+    setErrorsOwner((e) => ({ ...e, [field]: undefined }));
+  };
+
   const handleField = (field: keyof PetFormData, value: unknown) => {
     setForm((f) => ({ ...f, [field]: value }));
     setErrors((e) => ({ ...e, [field]: undefined }));
@@ -143,6 +152,17 @@ export const PetsForm: React.FC = () => {
     }));
 
   // ── Validation ─────────────────────────────────────────────────────────
+  //AQUI
+  const validateUser = () => {
+    const e: Partial<Record<keyof Owners, string>> = {};
+    if (!formOwner.email) e.email = "El email es obligatorio";
+    if (!formOwner.name.trim()) e.name = "El nombre es obligatorio";
+    if (!formOwner.phone) e.phone = "El telefono es obligatorio";
+    if (!formOwner.address) e.address = "Inserta Direccion";
+    setErrorsOwner(e);
+    return Object.keys(e).length === 0;
+  };
+
   const validateInfo = () => {
     const e: Partial<Record<keyof PetFormData, string>> = {};
     if (!form.owner_id) e.owner_id = "Selecciona un propietario";
@@ -182,7 +202,11 @@ export const PetsForm: React.FC = () => {
 
   // ── Navigation ─────────────────────────────────────────────────────────
   const goNext = () => {
-    if (step === "info") {
+    if (step === "user") {
+      if (!validateUser()) return;
+      setCompleted((c) => new Set([...c, "user"]));
+      setStep("info");
+    } else if (step === "info") {
       if (!validateInfo()) return;
       setCompleted((c) => new Set([...c, "info"]));
       setStep("medical");
@@ -194,6 +218,7 @@ export const PetsForm: React.FC = () => {
   };
 
   const goBack = () => {
+    if (step === "info") setStep("user");
     if (step === "medical") setStep("info");
     if (step === "vaccines") setStep("medical");
   };
@@ -201,15 +226,18 @@ export const PetsForm: React.FC = () => {
   // ── Submit ─────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!validateVaccines()) return;
-    setSubmitting(true);
+    try {
+      setSubmitting(true);
+      await registerPet(formOwner, form);
 
-    // 👇 Reemplaza con tu llamada al store / API real
-    console.log("Submitting:", form);
-    await new Promise((r) => setTimeout(r, 1200));
-
-    setSubmitting(false);
-    setCompleted((c) => new Set([...c, "vaccines"]));
-    setSuccess(true);
+      setCompleted((c) => new Set([...c, "vaccines"]));
+      setSuccess(true);
+    } catch (error) {
+      console.log("ERROR", error);
+    } finally {
+      setSubmitting(false);
+      fetchPets();
+    }
   };
 
   // ── Success screen ─────────────────────────────────────────────────────
@@ -242,7 +270,7 @@ export const PetsForm: React.FC = () => {
             <button
               onClick={() => {
                 setForm(INITIAL);
-                setStep("info");
+                setStep("user");
                 setCompleted(new Set());
                 setSuccess(false);
               }}
@@ -307,6 +335,13 @@ export const PetsForm: React.FC = () => {
           </div>
 
           {/* CONTENIDO */}
+          {step === "user" && (
+            <StepUser
+              data={formOwner}
+              errors={errorsOwner}
+              onChange={handleOwner}
+            />
+          )}
           {step === "info" && (
             <StepInfo data={form} errors={errors} onChange={handleField} />
           )}

@@ -5,21 +5,22 @@ import { useAuthStore } from "./useAuthStore";
 import { Pets } from "./usePetsStore";
 
 export interface Appointments {
-  id: string;
-  created_at: Date;
+  id?: string;
+  created_at?: string;
   pet_id: string;
   veterinarian_id: string;
-  date: Date;
+  date: string;
   reason: string;
   status: string;
-  date_end: Date;
+  date_end: string;
+  pets?: Pets;
 }
 
 export interface Medicals {
-  id: string;
-  created_at: Date;
-  pet_id: string;
-  veterinarian_id: string;
+  id?: string;
+  created_at?: string;
+  pet_id?: string;
+  veterinarian_id?: string;
   symptoms: string;
   diagnosis: string;
   treatment: string;
@@ -126,7 +127,12 @@ export const useAppointmentStore = create<UserState>()(
         }
         const { data, error } = await supabase
           .from("appointments")
-          .select("*")
+          .select(
+            `
+            *,
+            pets:pets(*)
+          `
+          )
           .eq("veterinarian_id", user.id);
 
         if (error) {

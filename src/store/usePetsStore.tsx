@@ -5,8 +5,8 @@ import { useAuthStore } from "./useAuthStore";
 import { Medicals } from "./useAppointmentStore";
 
 export interface Pets {
-  id: string;
-  created_at: Date;
+  id?: string;
+  created_at?: Date;
   owner_id: string;
   name: string;
   specie: string;
@@ -17,20 +17,20 @@ export interface Pets {
   weight: string;
   sterilized: boolean;
   blood_type: string;
-  is_deceased: boolean;
+  is_deceased?: boolean;
   color: string | null;
-  last_visit: string | null;
+  last_visit?: string | null;
   vaccines?: Vaccines[];
-  medical?: Medicals[];
+  medical?: Medicals;
 }
 
 export interface Vaccines {
   aplication_date: string;
-  created_at: string;
-  id: string;
+  created_at?: string;
+  id?: string;
   next_dose_date: string | null;
   notes: string;
-  pet_id: string;
+  pet_id?: string;
   vaccine_name: string;
 }
 
@@ -39,11 +39,11 @@ export interface Owners {
   created_at?: string;
   user_id: string;
   name: string;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  notes: string | null;
-  avatar_url: string | null;
+  email: string;
+  phone: string;
+  address: string;
+  notes: string;
+  avatar_url?: string | null;
 }
 
 export interface OwnerWithPets extends Owners {
@@ -189,6 +189,8 @@ export const usePetsStore = create<UserState>()(
               name: ownerData.name,
               email: ownerData.email,
               phone: ownerData.phone,
+              address: ownerData.address,
+              notes: ownerData.notes || null,
             },
           ])
           .select()

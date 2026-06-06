@@ -134,6 +134,7 @@ export const SPECIES_CONFIG_IND: Record<
 };
 
 export const STEPS: { id: Step; label: string; emoji: string }[] = [
+  { id: "user", label: "Datos del Propietario", emoji: "🙋🏻‍♂️" },
   { id: "info", label: "Datos de la mascota", emoji: "🐾" },
   { id: "medical", label: "Consulta inicial", emoji: "🩺" },
   { id: "vaccines", label: "Vacunas", emoji: "💉" },
